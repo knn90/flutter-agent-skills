@@ -1,0 +1,71 @@
+# Provenance + curation for the flutter-widget-expert skill.
+# Maintained by flutter-skill-consolidate — do not hand-edit pinned_commit / last_synced.
+
+skill: flutter-widget-expert
+domain: Flutter widgets (composition, state, layout, rebuild performance, navigation, animation, a11y)
+last_consolidated: 2026-07-08
+
+# Notes (writing-great-skills review) — preserve on re-consolidation:
+# - Description carries only triggers + reach clause (no provenance, no profile-key detail).
+# - §8 keeps only widget-layer async rules (mounted guards, FutureBuilder/StreamBuilder);
+#   deep async/isolates defer to flutter-async-expert.
+# - State-management PACKAGE choice is deferred to the project's state_type; this skill owns the
+#   framework-native primitives (StatefulWidget/setState/ValueListenable/InheritedWidget) + rebuild rules.
+
+discovery:
+  enabled: true
+  queries:                     # seeds for the discovery step (current year appended at run time)
+    - "Flutter widget best practices agent skill"
+    - "Flutter performance best practices"
+    - "awesome Flutter"
+    - "Flutter architecture guidelines widgets rebuild"
+  authority_anchors:           # always weighted top for currency
+    - "Flutter official documentation — widgets & performance (docs.flutter.dev)"
+    - "Flutter API reference (api.flutter.dev)"
+    - "Material 3 / Cupertino design guidelines"
+
+sources:
+  # ── PRIMARY / SOURCE OF TRUTH: Flutter/Dart official docs; win on any conflict ──
+  - name: Flutter — official widget, performance & UI documentation
+    url: https://docs.flutter.dev/ui
+    also:
+      - https://docs.flutter.dev/perf/best-practices
+      - https://docs.flutter.dev/perf/rendering-performance
+      - https://api.flutter.dev/
+      - https://docs.flutter.dev/ui/accessibility-and-internationalization/accessibility
+      - https://m3.material.io/
+    path: .
+    status: active
+    primary: true              # ranked first; the authoritative source of truth
+    consulted_version:         # record Flutter/Dart version consulted (not a git SHA)
+    last_synced: 2026-07-08
+    license: "Google / Flutter.dev — reference / learn-from only; never vendor verbatim"
+    note: >
+      Composition (widgets-over-methods, const), the constraints model (constraints down / sizes up),
+      rebuild/RepaintBoundary/keys performance guidance, accessibility (Semantics, tap targets, text
+      scaling), and Material 3 theming all come from the official docs and win on conflict, gated to
+      the profile's flutter_version.
+
+  # ── Community sources (methodology / checklist references — verify license before vendoring) ──
+  - name: Very Good Ventures — Very Good Engineering / flutter best practices
+    url: https://verygood.ventures/blog
+    path: .
+    status: active
+    last_synced: 2026-07-08
+    license: TBD
+    cite_only: true
+    note: Widget-layering, const-discipline, and testable-UI conventions cross-checked; adapted, not vendored.
+
+  - name: Code with Andrea — Flutter architecture & widget guides
+    url: https://codewithandrea.com/articles/
+    path: .
+    status: active
+    last_synced: 2026-07-08
+    license: TBD
+    cite_only: true
+    note: Rebuild-scoping, state-lifting, and navigation patterns cross-referenced against the official docs.
+
+# ── Evaluated by discovery ──
+# Community Flutter "best practices" repos vary widely in currency (pre-Material-3, pre-null-safety).
+# Only guidance confirmable against docs.flutter.dev / api.flutter.dev for the profile's flutter_version
+# is adopted; anything unverifiable stays a read-only reference.

@@ -1,0 +1,69 @@
+# Provenance + curation for the flutter-code-review skill.
+# Maintained by flutter-skill-consolidate — do not hand-edit pinned_commit / last_synced.
+# NOTE: flutter-code-review is a CORE skill (lives in flutter-skills/, not flutter-specialists/) but is
+# consolidatable — it carries this SOURCES.yaml so the consolidator can refresh its methodology.
+
+skill: flutter-code-review
+domain: Flutter code review (methodology + Dart / widgets / architecture / testing review)
+last_consolidated: 2026-07-08
+
+discovery:
+  enabled: true
+  queries:
+    - "Flutter code review agent skill"
+    - "Dart code review checklist"
+    - "Flutter architecture review"
+    - "multi-agent code review swarm"
+  authority_anchors:
+    - "Dart — Effective Dart (dart.dev/effective-dart)"
+    - "Flutter/Dart official documentation (flutter.dev / api.flutter.dev)"
+    - "the consuming project's rules_file (per .claude/flutter-profile.md)"
+
+sources:
+  # ── PRIMARY / SOURCE OF TRUTH ──
+  - name: Effective Dart + Flutter docs + the project's rules_file
+    url: https://dart.dev/effective-dart
+    also:
+      - https://docs.flutter.dev/
+      - https://api.flutter.dev/
+    path: .
+    status: active
+    primary: true
+    consulted_version: "Dart 3.x / Flutter 3.x"
+    last_synced: 2026-07-08
+    license: "Google / Dart.dev — reference; the project's rules_file is the per-project authority"
+    note: >
+      Review standards come from Effective Dart + Flutter official docs + the consuming project's
+      rules_file. Domain depth is DELEGATED to the installed specialist skills (flutter-widget-expert,
+      flutter-async-expert, flutter-testing-expert, …) — they are the source of truth for their
+      domains and are triggered per change-type during review (Stage 2.0). Don't duplicate them here.
+
+  # ── Community method sources (methodology references — verify license before vendoring) ──
+  - name: Dimillian/Skills — review-swarm          # parallel 4-lens review + precision-filter synthesis
+    url: https://github.com/Dimillian/Skills
+    path: review-swarm/
+    status: active
+    pinned_commit: 05ba982bfeb0
+    last_synced: 2026-07-08
+    license: MIT
+    cite_only: true
+    note: Methodology only (parallel multi-lens + precision-over-recall synthesis); Swift-specific content NOT vendored.
+
+  - name: Dimillian/Skills — review-and-simplify-changes   # reuse / quality / efficiency / clarity lens
+    url: https://github.com/Dimillian/Skills
+    path: review-and-simplify-changes/
+    status: active
+    pinned_commit: 05ba982bfeb0
+    last_synced: 2026-07-08
+    license: MIT
+    cite_only: true
+
+  - name: Viniciuscarvalho/swift-code-reviewer-skill   # scope banner, agent-loop feedback, severity SLAs, spec table
+    url: https://github.com/Viniciuscarvalho/swift-code-reviewer-skill
+    path: .
+    status: active
+    pinned_commit: 1d39ce338b11
+    last_synced: 2026-07-08
+    license: MIT
+    cite_only: true
+    note: Methodology (banner / agent-loop feedback / severity / spec table) adapted; language-specific rules replaced with Dart/Flutter.

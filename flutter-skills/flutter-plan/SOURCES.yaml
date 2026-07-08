@@ -1,0 +1,42 @@
+# Provenance + freshness tracking for the flutter-plan skill.
+# Maintained by flutter-skill-consolidate — do not hand-edit pinned_commit / last_synced.
+# NOTE: flutter-plan is a WORKFLOW skill (bespoke orchestration, NOT synthesized domain knowledge).
+# It is AUDIT-ONLY: the consolidator runs source staleness + discovery (Step 1) and surfaces
+# new/dead planning sources as a PR, but NEVER auto-merges content into SKILL.md. A human adapts
+# the ideas by hand (selectively), the way the current methodology was adopted.
+
+skill: flutter-plan
+domain: implementation planning & task breakdown (methodology for Flutter feature / refactor / ticket plans)
+mode: audit-only          # discovery + staleness only; synthesis (Steps 3–4) is SKIPPED
+last_consolidated: n/a    # never auto-synthesized — this skill is hand-curated
+
+discovery:
+  enabled: true
+  queries:
+    - "implementation planning agent skill"
+    - "task breakdown agent skill"
+    - "vertical slicing feature planning"
+    - "dependency graph build order planning"
+  authority_anchors:
+    - "Flutter/Dart official documentation (flutter.dev app architecture / dart.dev)"
+    - "the consuming project's rules_file (per .claude/flutter-profile.md)"
+
+sources:
+  - name: addyosmani/agent-skills — planning-and-task-breakdown
+    url: https://github.com/addyosmani/agent-skills
+    path: skills/planning-and-task-breakdown/
+    status: active
+    pinned_commit: TBD        # set on first audit run
+    last_synced: 2026-07-08
+    license: MIT
+    cite_only: true           # methodology reference — ideas adapted by hand, never vendored
+    note: >
+      Source of the dependency-graph build order, vertical slicing, per-task sizing (XL→split),
+      checkpoint cadence, and per-task acceptance criteria adopted (selectively) into flutter-plan.
+      Also adopted: size-by-file-count scale, the "and"-in-title split test, and contract-first
+      parallelization for team runs. The per-task Files-touched / Estimated-scope fields were
+      deliberately NOT adopted — they duplicate plan.md's File Changes table and the per-step size.
+      Using the skill directly (vendoring/installing) was considered and rejected: trigger overlap
+      with flutter-plan + a template that phases by maturity (Foundation/Core/Polish, contradicting
+      its own vertical-slice rule) + tasks/-dir output would break the plans_dir + ExitPlanMode
+      contracts. Future changes here are adapted by a human, not auto-merged.

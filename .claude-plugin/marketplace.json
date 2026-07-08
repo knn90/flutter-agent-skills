@@ -1,0 +1,14 @@
+{
+  "name": "flutter-agent-skills",
+  "owner": {
+    "name": "knn90",
+    "url": "https://github.com/knn90"
+  },
+  "plugins": [
+    {
+      "name": "flutter-skills",
+      "source": "./",
+      "description": "Flutter engineering workflow + specialist reviewers (scout · plan · execute · code-review · resolve, plus Widget / Async / Testing / SOLID experts)."
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+# Provenance + curation for the flutter-testing-expert skill.
+# Maintained by flutter-skill-consolidate — do not hand-edit pinned_commit / last_synced.
+
+skill: flutter-testing-expert
+domain: Flutter testing (unit / widget / golden / integration; flutter_test + package:test + tooling)
+last_consolidated: 2026-07-08
+
+discovery:
+  enabled: true
+  queries:
+    - "Flutter testing agent skill"
+    - "Flutter widget test best practices"
+    - "Flutter golden test determinism"
+    - "mocktail bloc_test integration_test best practices"
+  authority_anchors:
+    - "docs.flutter.dev — Testing Flutter apps"
+    - "api.flutter.dev — flutter_test / WidgetTester"
+    - "pub.dev — test, mocktail, mockito, bloc_test, integration_test, patrol, alchemist"
+
+sources:
+  # ── PRIMARY / SOURCE OF TRUTH: Flutter/Dart official testing docs ──
+  - name: Flutter — official testing documentation
+    url: https://docs.flutter.dev/testing
+    also:
+      - https://docs.flutter.dev/cookbook/testing/unit/introduction
+      - https://docs.flutter.dev/cookbook/testing/widget/introduction
+      - https://docs.flutter.dev/cookbook/testing/integration/introduction
+      - https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html
+      - https://pub.dev/packages/test
+    path: .
+    status: active
+    primary: true
+    consulted_version: "Flutter 3.x / Dart 3.x era"
+    last_synced: 2026-07-08
+    license: "Google / flutter.dev — reference / learn-from only; never vendor verbatim"
+    note: >
+      The layer taxonomy (unit/widget/golden/integration), WidgetTester + pump/pumpAndSettle semantics,
+      finders, matchesGoldenFile, and integration_test come from the official docs and win on conflict,
+      gated to the profile's flutter_version.
+
+  # ── Package official docs (SOURCE OF TRUTH for each package; follow pubspec.lock versions) ──
+  - name: pub.dev package docs — mocktail / mockito / bloc_test / integration_test / patrol / golden tooling
+    url: https://pub.dev/packages/mocktail
+    also:
+      - https://pub.dev/packages/mockito
+      - https://pub.dev/packages/bloc_test
+      - https://pub.dev/packages/fake_async
+      - https://pub.dev/packages/integration_test
+      - https://pub.dev/packages/patrol
+      - https://pub.dev/packages/alchemist
+      - https://pub.dev/packages/golden_toolkit
+    path: .
+    status: active
+    last_synced: 2026-07-08
+    license: "per-package (MIT/BSD/Apache) — reference"
+    note: Mocking (registerFallbackValue/any), bloc_test (blocTest/seed), fakeAsync, golden tooling, and integration/patrol usage follow each package's official docs at the pinned version.
+
+  # ── Community sources (idiom / determinism references — verify license before vendoring) ──
+  - name: Very Good Ventures — testing standards (very_good_analysis, 100%-coverage house style)
+    url: https://verygood.ventures/blog
+    path: .
+    status: active
+    last_synced: 2026-07-08
+    license: TBD
+    cite_only: true
+    note: Widget-test hermeticity, bloc_test idioms, and golden determinism cross-checked; adapted, not vendored.
+
+  - name: Code with Andrea — Flutter testing guides
+    url: https://codewithandrea.com/articles/
+    path: .
+    status: active
+    last_synced: 2026-07-08
+    license: TBD
+    cite_only: true
+    note: Test-pyramid guidance, mocktail vs mockito, and Riverpod/Bloc test setup referenced.
+
+# ── Notes ──
+# Unlike iOS (two frameworks: Swift Testing + XCTest), Flutter has ONE test framework (flutter_test /
+# package:test) layered by test KIND (unit/widget/golden/integration). This skill was authored against
+# flutter.dev, not translated from the iOS testing skill — there is no framework-migration section.

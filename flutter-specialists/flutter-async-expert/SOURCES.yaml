@@ -1,0 +1,69 @@
+# Provenance + curation for the flutter-async-expert skill.
+# Maintained by flutter-skill-consolidate — do not hand-edit pinned_commit / last_synced.
+
+skill: flutter-async-expert
+domain: Dart async (Futures, Streams, async/await, isolates, cancellation, Zones)
+last_consolidated: 2026-07-08
+
+discovery:
+  enabled: true
+  queries:                     # seeds for the discovery step (current year appended at run time)
+    - "Dart async agent skill"
+    - "Dart Future Stream best practices"
+    - "Dart isolates concurrency"
+    - "Flutter async await pitfalls"
+  authority_anchors:           # always weighted top for currency (this is a *language + core-lib* feature)
+    - "dart.dev — Asynchronous programming (language tour)"
+    - "dart.dev — Concurrency in Dart / Isolates"
+    - "dart:async API reference (api.dart.dev)"
+    - "docs.flutter.dev — isolates / compute"
+
+sources:
+  # ── PRIMARY / SOURCE OF TRUTH: dart.dev — async is a language + core-library feature ──
+  - name: Dart — official asynchronous programming & concurrency guidance
+    url: https://dart.dev/language/async
+    also:
+      - https://dart.dev/libraries/async/using-streams
+      - https://dart.dev/language/concurrency
+      - https://dart.dev/language/isolates
+      - https://api.dart.dev/stable/dart-async/dart-async-library.html
+      - https://docs.flutter.dev/perf/isolates
+    path: .
+    status: active
+    primary: true              # ranked first; the authoritative source of truth
+    consulted_version: "Dart 3.x / Flutter 3.x era"
+    last_synced: 2026-07-08
+    license: "Google / dart.dev — reference / learn-from only; never vendor verbatim"
+    note: >
+      The event-loop model (microtask vs event queue), Future/Stream semantics, single-subscription
+      vs broadcast, isolates (compute / Isolate.run / ports), Completer contract, and the lack of
+      Future cancellation all come from the official docs and win on conflict, gated to the profile's
+      min_sdk/flutter_version.
+
+  # ── Community sources (methodology / LLM-mistake references — verify license before vendoring) ──
+  - name: Code with Andrea — Dart async / streams / isolates guides
+    url: https://codewithandrea.com/articles/
+    path: .
+    status: active
+    last_synced: 2026-07-08
+    license: TBD
+    cite_only: true
+    note: In-flight dedup, out-of-order response handling, and mounted-guard patterns cross-checked; adapted, not vendored.
+
+  - name: Invertase / dart packages — async, rxdart, synchronized (API references)
+    url: https://pub.dev/packages/async
+    also:
+      - https://pub.dev/packages/rxdart
+      - https://pub.dev/packages/synchronized
+      - https://pub.dev/packages/fake_async
+    path: .
+    status: active
+    last_synced: 2026-07-08
+    license: "per-package (BSD/MIT/Apache) — reference"
+    cite_only: true
+    note: CancelableOperation, StreamGroup, debounce/combineLatest combinators, locks, and fakeAsync testing referenced from official package docs.
+
+# ── Notes ──
+# No Apple-equivalent "official async agent skill" analogue exists for Dart; dart.dev is the normative
+# source. Dart's model differs fundamentally from Swift Concurrency (single-threaded event loop + isolates,
+# no shared-memory data races) — this skill was authored against dart.dev, not translated from Swift.

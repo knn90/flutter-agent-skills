@@ -1,0 +1,69 @@
+# Provenance + curation for the flutter-solid-expert skill.
+# Maintained by flutter-skill-consolidate — do not hand-edit pinned_commit / last_synced.
+
+skill: flutter-solid-expert
+domain: SOLID principles + clean-architecture decoupling (Flutter / Dart)
+last_consolidated: 2026-07-08
+
+discovery:
+  enabled: true
+  queries:
+    - "SOLID principles Dart agent skill"
+    - "Flutter clean architecture dependency inversion"
+    - "Flutter decoupling decorator composite adapter"
+    - "Dart abstract interface class mixins composition"
+  authority_anchors:
+    - "Robert C. Martin — SOLID / Clean Architecture (canonical, general SW engineering)"
+    - "dart.dev — Classes, Abstract & interface classes, Mixins, Class modifiers"
+    - "the consuming project's architecture + rules_file"
+
+sources:
+  # ── PRIMARY / SOURCE OF TRUTH ──
+  - name: SOLID (Robert C. Martin) + Dart class/interface/mixin model
+    url: https://en.wikipedia.org/wiki/SOLID
+    also:
+      - https://dart.dev/language/classes
+      - https://dart.dev/language/class-modifiers        # abstract interface class, sealed, final, base
+      - https://dart.dev/language/mixins
+      - "Robert C. Martin — Clean Architecture: A Craftsman's Guide (2017); SRP/OCP/LSP/ISP/DIP"
+    path: .
+    status: active
+    primary: true
+    consulted_version: "SOLID (Martin); Dart 3 class modifiers / implicit interfaces"
+    last_synced: 2026-07-08
+    license: "Canonical SW-engineering principles (public knowledge) + dart.dev reference; re-express in original words"
+    note: >
+      SOLID is general software engineering — Flutter takes NO official app-architecture stance, so the
+      authority is Martin's principles, translated to Dart via implicit interfaces / abstract interface
+      class / mixins / composition. The principles are public knowledge (not proprietary); write original
+      guidance. PATTERN selection (Clean/MVVM/feature-first, Bloc/Riverpod) is owned by the architecture
+      lens, not this skill.
+
+  # ── Worked example (MIT — reference for the decoupling patterns) ──
+  - name: essentialdevelopercom/essential-feed-case-study   # Essential Developer — Feed case study
+    url: https://github.com/essentialdevelopercom/essential-feed-case-study
+    path: .
+    status: reference            # Swift source; used for the language-agnostic decoupling PATTERNS only
+    pinned_commit: 706a0da381b2
+    last_synced: 2026-07-08
+    license: MIT
+    note: >
+      Best permissively-licensed worked example of dependency inversion, composition root, and the
+      Decorator/Composite/Adapter/Facade decoupling patterns. It is Swift, so it's a PATTERN reference
+      only — the Dart translation (implicit interfaces / mixins / get_it composition root) is authored
+      here, not vendored. Essential Developer's paid course content is copyrighted — never use it.
+
+  # ── Community Flutter clean-architecture references (verify license before vendoring) ──
+  - name: Reso Coder / Code with Andrea — Flutter clean architecture & DI guides
+    url: https://codewithandrea.com/articles/
+    path: .
+    status: active
+    last_synced: 2026-07-08
+    license: TBD
+    cite_only: true
+    note: Domain/data-layer split, DTO→entity mapping, and get_it/Riverpod composition-root patterns cross-checked; adapted, not vendored.
+
+# ── Notes ──
+# Authored Dart-native against dart.dev's class/interface/mixin model — not translated verbatim from the
+# Swift protocol-oriented skill. Framework-isolation targets updated to Flutter (no flutter/material,
+# dio, sqflite, firebase, BuildContext in the domain).
