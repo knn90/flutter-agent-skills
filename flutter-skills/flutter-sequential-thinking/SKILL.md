@@ -89,7 +89,7 @@ N [FINAL]: cache fix + invalidation strategy
 ### Async race / cancellation / leak
 ```
 1: Identify Future/Stream boundaries (created / awaited / listened / cancelled)
-2: UI isolate vs isolate/compute — any heavy work blocking the UI isolate?
+2: main isolate vs background isolate (compute/Isolate.run) — any heavy work blocking the main isolate?
 3: Cancellation — is the StreamSubscription cancelled / CancelableOperation honoured in dispose()?
 4: Reentrancy — re-callable while a previous await is suspended? unawaited future racing state?
 5 [HYPOTHESIS]: e.g. cursor advanced while previous fetch in-flight; setState after dispose

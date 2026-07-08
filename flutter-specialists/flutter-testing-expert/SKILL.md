@@ -1,6 +1,6 @@
 ---
 name: flutter-testing-expert
-description: "Expert Flutter testing guidance — unit / widget / golden / integration layers, flutter_test & package:test mechanics, finders, pump vs pumpAndSettle, test doubles/DI (mocktail/mockito), bloc_test, async testing, golden determinism, coverage & flakiness. Fires when work touches tests (test(, testWidgets(, expect(, WidgetTester, mocktail, files under test/)."
+description: "Expert Flutter testing guidance — unit / widget / golden / integration layers, flutter_test & package:test mechanics, test doubles/DI (mocktail/mockito), bloc_test, async testing. Fires when work touches tests (test(, testWidgets(, expect(, WidgetTester, mocktail, files under test/)."
 ---
 
 # Flutter Testing Expert
@@ -52,7 +52,7 @@ Profile: `.claude/flutter-profile.md` — worktrees don't inherit it; fall back 
 
 ## 6. Async & time
 - **Never use real delays.** Control virtual time with **`fakeAsync`** (`package:fake_async`) for pure Dart (`fakeAsync((async) { … async.elapse(Duration(seconds: 5)); })`), and **`tester.pump(duration)`** in widget tests. For real async that must run (a real `Future` off the test's fake clock), wrap in **`await tester.runAsync(() async => …)`**.
-- Streams: `expectLater(bloc.stream, emitsInOrder([...]))`; drain a `StreamController` you own and `close()` it in `tearDown`. Timers must be cancelled — `fakeAsync` **throws if timers are still pending** at the end, which catches leaks.
+- Streams: `expectLater(bloc.stream, emitsInOrder([...]))`; drain a `StreamController` you own and `close()` it in `tearDown`. Timers must be cancelled — assert `async.pendingTimers` is empty (the `testWidgets` binding fails on a leaked timer; bare `fakeAsync` does not).
 - Bridge a callback into an awaitable with a `Completer` in the test. Test error/cancellation paths explicitly (`throwsA`, assert the source stopped).
 
 ## 7. State-management testing
@@ -66,7 +66,7 @@ Profile: `.claude/flutter-profile.md` — worktrees don't inherit it; fall back 
 
 ## 9. Coverage, flakiness & CI
 - `flutter test --coverage` → `coverage/lcov.info`; treat coverage as a *gap-finder*, not a target (100% of getters proves nothing). Exclude `generated_paths` from coverage.
-- **Flakiness checklist:** no ordering reliance · no un-reset globals/singletons (`get_it` — `reset()` in tearDown) · no real `sleep`/network/clock/random · `pumpAndSettle` not used on infinite animations · timers cancelled (fakeAsync catches leaks) · goldens pinned to one environment · fixed surface size.
+- **Flakiness sources** are enumerated as the §10 completion criterion — the usual culprits are un-reset globals/singletons (`get_it` — `reset()` in tearDown), real `sleep`/network/clock/random, leaked timers/subscriptions, unpinned goldens, and ordering reliance.
 - Keep tests **fast and hermetic**; a flaky test is worse than no test — quarantine (`skip: 'reason'`) with a tracking issue rather than let it erode trust, and fix or delete it.
 
 ## 10. Common mistakes / anti-patterns (completion criterion)
@@ -82,4 +82,4 @@ A critique pass is done only when the bolded rules in §§1–9 and the items be
 - Testing a whole widget tree to prove one branch instead of testing the state holder directly.
 
 ## Currency
-Package APIs move: `mocktail` (`registerFallbackValue`, `any(named:)`), `bloc_test` (`wait`, `seed`), `integration_test`/`patrol`, and golden tooling (`alchemist` vs `golden_toolkit`) vary by version — follow the versions pinned in `pubspec.lock`. `flutter_test`/`package:test` matchers are stable; maintainer notes + package refs live in `SOURCES.yaml`.
+`flutter_test`/`package:test` matchers are stable; per-package APIs (`mocktail`, `bloc_test`, `integration_test`/`patrol`, `alchemist`/`golden_toolkit`) vary by version. Maintainer notes + package refs live in `SOURCES.yaml`.

@@ -29,8 +29,8 @@ Profile: `.claude/flutter-profile.md` — worktrees don't inherit it; fall back 
 - Don't rebuild from `InheritedWidget` for high-frequency values (scroll offset, animation ticks) read by many widgets — every dependent rebuilds; use a targeted `ValueListenable`/`AnimatedBuilder` instead.
 
 ## 2. Widget composition & reuse
-- **Extract subtrees into real `Widget` classes, not helper methods returning `Widget`.** A `_buildHeader()` method re-runs whenever the parent rebuilds and its result can't be `const`; a `HeaderWidget` class with `const` constructor lets Flutter skip rebuilding it when inputs are unchanged. This is the single highest-leverage composition rule.
-- **`const` all the way down.** A `const` constructor + `const` call site means the element is canonicalized and never rebuilt. Make constructors `const` wherever fields allow; enable the `prefer_const_constructors` lint.
+- **Extract subtrees into real `Widget` classes, not helper methods returning `Widget`.** A `_buildHeader()` method inlines its subtree into the parent's element, so it re-runs on every parent rebuild (unless it returns a `const` widget) and gets no element boundary of its own; a `HeaderWidget` class with `const` constructor gets its own element and lets Flutter skip rebuilding it when inputs are unchanged. This is the single highest-leverage composition rule.
+- **`const` all the way down.** A `const` constructor + `const` call site means the widget instance is canonicalized, so its element is reused and its subtree skipped on rebuild. Make constructors `const` wherever fields allow; enable the `prefer_const_constructors` lint.
 - Keep `build` pure and cheap: no I/O, no `Future` starts, no filtering/sorting/formatter allocation inline — do that in `initState`/the model/memoized fields. `build` can be called every frame.
 - Prefer **composition over configuration**: many small widgets over one widget with 15 boolean flags. One primary widget per file; split files past ~300 lines; flag a `build` longer than ~one screen.
 - Use `Builder` to get a `BuildContext` below an inherited widget you just inserted (e.g. `Scaffold.of(context)` needs a context under the `Scaffold`). Don't reach for a `GlobalKey` where a `Builder`/callback suffices — `GlobalKey`s are expensive and easy to leak.
@@ -93,7 +93,7 @@ Profile: `.claude/flutter-profile.md` — worktrees don't inherit it; fall back 
 - Use `SafeArea`, `MediaQuery` padding/insets (keyboard via `viewInsets`), and `Scaffold`'s `resizeToAvoidBottomInset` correctly rather than hard-coding notch/status-bar offsets.
 
 ## Review completion criterion
-A critique pass is done only when the always/never rules in §§1–11 have each been **ruled in or out**
+A critique pass is done only when each **bolded** rule in §§1–11 has been **ruled in or out**
 against the diff — not when the obvious findings run dry.
 
 ## Contested / judgment calls

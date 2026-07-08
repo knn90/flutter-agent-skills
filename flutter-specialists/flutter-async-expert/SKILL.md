@@ -27,7 +27,7 @@ Profile: `.claude/flutter-profile.md` — worktrees don't inherit it; fall back 
 ## 2. Future semantics & pitfalls
 - A `Future<T>` is a one-shot eventual value: pending → completed-with-value **or** completed-with-error. Prefer `async`/`await` over `.then()`/`.catchError()` chains — the compiler-friendly linear form is far easier to get error handling right.
 - **Never drop a future on the floor.** An un-awaited future whose error you don't handle becomes an **unhandled async error** (crashes / logs, and races real state). If you deliberately fire-and-forget, wrap it in `unawaited(...)` (from `dart:async`) *and* ensure the callee handles its own errors — that documents intent and silences the lint.
-- **`await` inside a `for` loop serializes** each iteration. For independent work, collect futures and `await Future.wait([...])` (parallel) — but know `Future.wait` **rejects on the first error and does not cancel the rest**; use `eagerError`/handle per-future (`.catchError`) when you need all results or partial success.
+- **`await` inside a `for` loop serializes** each iteration. For independent work, collect futures and `await Future.wait([...])` (parallel) — but know `Future.wait` **completes with an error if any future fails and cancels none**; by default it still waits for all to finish first, so pass `eagerError: true` to fail fast, or attach `.catchError` per-future when you need partial success.
 - `Future.delayed(Duration.zero)` is an **event-queue** hop, not a microtask — don't use it to "wait for state"; it's a code smell for a real ordering fix.
 - Don't mark a function `async` if it never `await`s — it just wraps the result in an extra future. Return the future directly (`return foo();`) unless you need a `try/catch` around it.
 
@@ -56,7 +56,7 @@ Profile: `.claude/flutter-profile.md` — worktrees don't inherit it; fall back 
   - **`StreamSubscription.cancel()`** stops stream delivery (and should stop the producer via `onCancel`).
   - **`package:async` `CancelableOperation`** wraps a future with a `cancel()` for one-shot work.
   - A **flag** the async loop checks at safe points (like cooperative cancellation) for CPU loops.
-- In Flutter, the practical cancellation boundary is the widget/state lifecycle: **guard `if (!mounted) return;` (or `context.mounted`) after every `await`** before touching state or `BuildContext`, and cancel subscriptions/timers/operations in `dispose()`. A resolved future that calls `setState` on a disposed `State` throws.
+- In Flutter, the cancellation boundary is the widget/state lifecycle: the mounted-guard mechanics live in `flutter-widget-expert` §8; the async concern here is to **cancel subscriptions/timers/`CancelableOperation`s in `dispose()`** so the source actually stops.
 - **Don't swallow the fact that work kept running** — a "cancelled" screen whose future still writes global state or fires analytics is the classic stale-write bug. Ignore the *result* (mounted guard) **and** stop the *source* (cancel the subscription/operation).
 
 ## 7. Completers

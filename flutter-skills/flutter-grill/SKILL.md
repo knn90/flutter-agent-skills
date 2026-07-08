@@ -1,6 +1,6 @@
 ---
 name: flutter-grill
-description: "Grill a Flutter implementation plan — stress-test it one decision at a time, each question carrying a recommended answer, codebase checked first. Auto-run by flutter-resolve between plan and approval; standalone on a plan dir or ticket id. Does NOT implement."
+description: "Grill a Flutter implementation plan — pressure-test its open decisions and hidden assumptions before implementation. Auto-run by flutter-resolve between plan and approval; standalone on a plan dir or ticket id. Does NOT implement."
 argument-hint: "[plan-dir | TICKET-ID]"
 model: best
 effort: high

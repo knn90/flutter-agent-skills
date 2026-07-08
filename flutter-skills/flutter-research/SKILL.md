@@ -60,7 +60,7 @@ Query patterns: `<topic> flutter <flutter_version>`, `<topic> dart async stream`
 ### Phase 4 — Cross-reference & validate
 - 2+ independent sources per claim; flag conflicts.
 - Reject APIs above `min_sdk`/`flutter_version` unless the user agrees to bump the SDK constraint.
-- Discard anything older than the framework/package major version in use; check pub.dev for null-safety and latest-stable compatibility.
+- Discard anything older than the framework/package major version in use; check pub.dev for latest-stable compatibility.
 
 ### Phase 5 — Report
 Save to `{reports_dir}/research-{YYMMDD-HHMM}-{TICKET|slug}.md`.
