@@ -112,7 +112,7 @@ under `$(git rev-parse --path-format=absolute --git-common-dir)/..`. Then:
 
 Next: the flutter-* skills are now live for this project.
 - Find code            → flutter-scout
-- Plan a feature       → flutter-plan
+- Plan a feature       → wayfinder
 - Implement            → flutter-execute
-- Resolve end-to-end   → flutter-resolve <ticket | "description">  (scout→plan→execute→review→PR)
+- Resolve end-to-end   → flutter-resolve <ticket | "description">  (wayfinder→scout→execute→review→PR)
 ```

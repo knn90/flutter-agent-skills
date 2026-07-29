@@ -8,15 +8,18 @@ every project-specific fact lives in the profile and is read at runtime.
 ```
 flutter-project-init ──→ .claude/flutter-profile.md        # run ONCE per project
 
-flutter-resolve  ── one command: ticket/context → scout → plan → grill → execute → review → PR
+flutter-resolve  ── one command: ticket/context → wayfinder → scout → execute → review → PR
       │
       ├─ flutter-scout ────────┐
       ├─ flutter-research ──────┤
-      ├─ flutter-brainstorm ────┼─→ flutter-plan ─→ flutter-grill ─→ flutter-execute ─→ flutter-code-review
+      ├─ flutter-brainstorm ────┼─→ wayfinder ─→ flutter-execute ─→ flutter-code-review
       └─ flutter-sequential-thinking  (reasoning aid; plugs in anywhere)
                                           │ apply           │ route
                                           └─── flutter-specialists ───┘
                           (Widget · Async · Testing · TDD · SOLID — Flutter/Dart-primary)
+
+Planning is delegated to mattpocock-skills:wayfinder (charts a spec via its own sub-skills),
+then /to-tickets slices it when needed — install mattpocock-skills alongside this suite.
 ```
 
 ## Setup (once per project)
@@ -67,14 +70,15 @@ flutter-resolve ABC-123 --solo --no-pr    # single agent, stop before the PR
 `flutter-resolve` is the front door. It runs:
 
 ```
-fetch ticket/context → create branch → flutter-scout → flutter-plan → flutter-grill (harden) ──(you approve)──►
-    flutter-execute (TDD; solo or --team N) → flutter-code-review → /commit → open PR
+fetch ticket/context → create branch → wayfinder (spec) ──(you approve)──► to-tickets (if needed)
+    → flutter-scout → flutter-execute (TDD; solo or --team N) → flutter-code-review → /commit → open PR
 ```
 
-`flutter-grill` interrogates the plan's open decisions one at a time (each with a recommended answer,
-codebase checked first) and folds your answers back in — so you approve a **hardened** plan, not a
-plan full of unstated assumptions. It auto-skips when the plan is already unambiguous.
-You approve the plan **before** any code is written, and nothing is pushed without you.
+`wayfinder` charts the work as a spec — naming the destination, then resolving its open decisions
+one at a time (driving its own sub-skills — prototyping, grilling, research, … — as each demands)
+so you approve a **hardened** spec, not one full of unstated assumptions. For a small, clear change
+it declines the map and the flow falls straight through to scout → execute.
+You approve the spec **before** any code is written, and nothing is pushed without you.
 
 ### Or à la carte
 
@@ -84,8 +88,7 @@ Every skill also stands alone:
 flutter-scout OrderListBloc               # where does this live?
 flutter-research "offline sync options"   # sourced technical research
 flutter-brainstorm "offline support"      # brutal trade-off analysis → decision report
-flutter-plan ABC-123                       # phased plan (you approve)
-flutter-grill <plan-dir>                   # stress-test a plan: grill open decisions, harden it
+wayfinder "offline support"                # chart the spec (you approve); a mattpocock-skills skill
 flutter-execute <plan-path> --team 2       # implement (TDD; parallel worktree team)
 flutter-code-review #42                    # adversarial, multi-lens review of a PR
 ```
@@ -97,14 +100,13 @@ flutter-code-review #42                    # adversarial, multi-lens review of a
 | Skill | Role |
 |---|---|
 | `flutter-project-init` | One-time: writes `.claude/flutter-profile.md` (detect existing app / set greenfield conventions). |
-| `flutter-resolve` | **The front door.** ticket/context → scout → plan → execute → review → PR. Orchestrates; never implements directly. |
+| `flutter-resolve` | **The front door.** ticket/context → wayfinder → scout → execute → review → PR. Orchestrates; never implements directly. |
 | `flutter-scout` | Fast, token-efficient parallel code discovery — returns a *map*, not analysis. |
 | `flutter-research` | Sourced technical research grounded in the codebase. |
 | `flutter-brainstorm` | Brutally honest trade-off analysis → decision report. |
 | `flutter-sequential-thinking` | Step-by-step reasoning aid; plugs in anywhere. |
-| `flutter-plan` | Phased implementation plan, with an approval gate. |
-| `flutter-grill` | Stress-tests the plan **before** approval: interrogates open decisions one at a time (recommended answer each, codebase checked first), folds answers back into `plan.md`. Auto-skips when the plan is unambiguous. |
-| `flutter-execute` | **The only implementer.** plan → code → verify → review. **TDD always**; solo, or `--team N` (parallel worktree devs + peer review + a dedicated edge-case reviewer + merge). |
+| `wayfinder` *(mattpocock-skills)* | Planning front-end: charts the work as a spec through decision tickets, driving its own sub-skills (prototyping, grilling, research, …); `/to-tickets` then slices the spec. Approval gate on the spec. Not part of this suite — install `mattpocock-skills` alongside it. |
+| `flutter-execute` | **The only implementer.** spec → code → verify → review. **TDD always**; solo, or `--team N` (parallel worktree devs + peer review + a dedicated edge-case reviewer + merge). |
 | `flutter-code-review` | Multi-lens adversarial review; **routes change-typed slices to the specialists**; precision-over-recall findings. |
 
 **Specialists — `flutter-specialists/` (optional add-ons; auto-used once installed)**
@@ -143,7 +145,7 @@ flutter-agent-skills/
 │   ├── plugin.json              #   bundles flutter-skills/ + flutter-specialists/ as the plugin
 │   └── marketplace.json         #   self-marketplace listing the plugin
 ├── README.md
-├── flutter-skills/              # core workflow (10 skills)       — shipped by the plugin
+├── flutter-skills/              # core workflow (8 skills)        — shipped by the plugin
 │   └── flutter-project-init/flutter-profile.template.md   # copy to <project>/.claude/flutter-profile.md
 ├── flutter-specialists/         # optional specialist reviewers   — shipped by the plugin
 ├── flutter-skill-consolidate/   # repo-maintenance (rebuilds skills from sources) — NOT shipped
@@ -153,7 +155,7 @@ flutter-agent-skills/
 ## Core principles (every skill)
 
 - **Profile-driven** — read `.claude/flutter-profile.md` first; never hardcode project facts.
-- **Plan-first** — no implementation before an approved plan (hard gate in `flutter-execute`).
+- **Plan-first** — no implementation before an approved spec/plan (hard gate in `flutter-execute`).
 - **TDD always** — `flutter-execute` writes a failing test before the code.
 - **Verify before claiming** — run `verify_command`, read the output, *then* claim done (empty → analyze/build-only, stated).
 - **Flutter / Dart official = source of truth** — specialists and review defer to flutter.dev / dart.dev over community sources.

@@ -26,7 +26,7 @@ Output is one consumable `SKILL.md` (+ `references/`).
 > (for `all`, loop over every specialist).
 
 > **Audit-only targets.** A `SOURCES.yaml` with `mode: audit-only` marks a skill whose body is
-> **hand-curated, not synthesized** (e.g. `flutter-plan` — a workflow/orchestration skill, not
+> **hand-curated, not synthesized** (e.g. `flutter-resolve` — a workflow/orchestration skill, not
 > distilled domain knowledge). For these, run **Step 1 (rot + discovery)** and **Step 5
 > (report)** only — **skip Steps 2–4 and NEVER write the target's `SKILL.md`.** Output is a
 > freshness report + a proposed `SOURCES.yaml` diff (retire dead / add candidate sources) plus a

@@ -30,7 +30,7 @@ user to run `flutter-project-init` first (greenfield repos have nothing to scout
 | Single file, known path | `Read` |
 | One symbol grep | `Grep` |
 | Trade-off discussion | `flutter-brainstorm` |
-| Full implementation plan | `flutter-plan` |
+| Full implementation plan | `wayfinder` |
 | Pattern outside the repo | `flutter-research` |
 
 ---
