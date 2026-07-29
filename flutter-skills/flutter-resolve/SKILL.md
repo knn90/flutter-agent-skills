@@ -109,7 +109,7 @@ Note this in `_status.md`.
 Unless `--skip-approval`, present a summary of the spec and **wait**:
 ```
 Spec ready: {spec location}
-- Destination: {one line}     Files touched (est.): {n}   Feature flag: {name|n/a}   HIGH-RIGOR: {yes/no}
+- Destination: {one line}     Files touched (est., from spec): {n}   Feature flag: {name|n/a}   HIGH-RIGOR (best-effort; flutter-execute re-checks vs high_rigor_domains): {yes/no}
 - Key decisions: {3-5 bullets from the wayfinder map's Decisions-so-far}
 Reply: approved · revise: {feedback} · abort
 ```
