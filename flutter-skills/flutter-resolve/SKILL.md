@@ -1,15 +1,15 @@
 ---
 name: flutter-resolve
 description: "Resolve a ticket or a free-form request end-to-end for a Flutter project — the single front door from input to open PR. Use when given a ticket id or told to 'resolve/ship/work on' something."
-argument-hint: "[TICKET-ID | \"description\"] [--devs N | --solo] [--base BRANCH] [--skip-approval] [--no-grill] [--no-pr]"
+argument-hint: "[TICKET-ID | \"description\"] [--devs N | --solo] [--base BRANCH] [--skip-approval] [--no-pr]"
 ---
 
 # Resolve — Flutter end-to-end workflow
 
 One command takes a **ticket or free-form context** all the way to an open PR. This skill only
-**sequences and gates** — the real work is done by the other `flutter-*` skills: never re-do what a
-sub-skill already does, never skip a gate. Project-agnostic: every fact comes from
-`.claude/flutter-profile.md` — never hardcode app specifics.
+**sequences and gates** — the real work is done by `wayfinder` (planning) and the other `flutter-*`
+skills (implementation): never re-do what a sub-skill already does, never skip a gate.
+Project-agnostic: every fact comes from `.claude/flutter-profile.md` — never hardcode app specifics.
 
 ## Step 0 — Load profile
 
@@ -27,11 +27,13 @@ scout/implement against) → tell the user to bootstrap the app first.
 | Use | Don't — use instead |
 |---|---|
 | A ticket id to take to PR | Just find files → `flutter-scout` |
-| "Resolve / ship / work on X" end-to-end | Just a plan, no code → `flutter-plan` |
-| A described change spanning scope→plan→code→PR | Implement an existing plan → `flutter-execute <plan-path>` |
+| "Resolve / ship / work on X" end-to-end | Just chart the spec → `wayfinder` |
+| A described change spanning spec→code→PR | Implement an existing spec/tracer-bullet ticket → `flutter-execute <path>` |
 | | Trade-off discussion → `flutter-brainstorm` · review only → `flutter-code-review` |
 
-For a trivial one-file fix, skip this — edit directly (or `flutter-execute --fast`).
+**Sizing** (referenced below):
+- **trivial** — single file, < ~20 lines → skip this skill; edit directly (or `flutter-execute --fast`).
+- **small** — fits one session, no open decisions → wayfinder declines the map (Step 3); scout may be skipped (Step 5).
 
 ---
 
@@ -49,8 +51,7 @@ flutter-resolve "fix crash on empty cart" --no-pr
 - **"free-form"** — used as the task description (no ticket fetch).
 - `--devs N` / `--solo` — passed through to `flutter-execute`.
 - `--base BRANCH` — PR target + branch-from point (default `default_base_branch`, else `main`).
-- `--skip-approval` — skip the plan approval gate (trivial/well-understood only). Also skips grill.
-- `--no-grill` — skip the plan stress-test (Step 4.5) but keep the approval gate.
+- `--skip-approval` — skip the spec approval gate (trivial/well-understood only).
 - `--no-pr` — stop after commit; print push/PR steps for the user.
 
 ---
@@ -61,15 +62,16 @@ flutter-resolve "fix crash on empty cart" --no-pr
 0. Load profile
 1. RESOLVE INPUT   ticket → fetch context · free-form → use as description
 2. INIT            branch {type}/{slug} off {PR_BASE}; create {plans_dir}/{slug}/_status.md
-3. SCOUT           flutter-scout → scope.md
-4. PLAN            flutter-plan  → plan.md
-4.5 GRILL          flutter-grill → hardened plan.md + grill.md
-    GATE           ──► APPROVAL on the hardened plan
-5. IMPLEMENT       flutter-execute (owns the verify + review gates)
-6. COMMIT          /commit anything left
-7. PR              push + open PR → {PR_BASE}
-8. TICKET          best-effort transition (e.g. → In Review)
-9. REPORT          branch · PR url · files · tests · review verdict
+3. WAYFINDER       /mattpocock-skills:wayfinder → chart map · answer questions live · land the spec
+                   (single session, human-present; drives its own sub-skills internally)
+    GATE           ──► APPROVAL on the spec
+4. SLICE           /mattpocock-skills:to-tickets → break the spec into tracer-bullet tickets (if needed)
+5. SCOUT           flutter-scout → scope.md
+6. IMPLEMENT       flutter-execute (owns the verify + review gates)
+7. COMMIT          /commit anything left
+8. PR              push + open PR → {PR_BASE}
+9. INPUT TICKET    best-effort transition (e.g. → In Review)
+10. REPORT         branch · PR url · files · tests · review verdict
 ```
 
 ### Step 1 — Resolve input
@@ -87,82 +89,91 @@ flutter-resolve "fix crash on empty cart" --no-pr
 - `git fetch && git checkout -b {type}/{slug} origin/{PR_BASE}` (resume if it already exists).
 - Create `{plans_dir}/{slug}/_status.md` (task title, ticket, base, branch, phase checklist).
 
-### Step 3 — Scout
-Invoke `flutter-scout {target}` (target = main component/feature from the ticket, or the description).
-Write its map to `{plans_dir}/{slug}/scope.md`. Skip only for a truly trivial single-file change.
+### Step 3 — Wayfinder (chart the map → spec)
+Invoke `/mattpocock-skills:wayfinder` with the resolved input from Step 1 (the input ticket context)
+as the loose idea, plus a **Note that this is a single-session, human-present effort: chart, then
+drive to a spec now** — overriding wayfinder's default one-ticket-per-session / stop-after-charting
+cadence. Then, in this one session, wayfinder:
+1. **Charts the map** — names the destination (a **spec** to hand to implementation) and surfaces the open **decision tickets**.
+2. **Works them live** — the user answers each clarification question in turn (wayfinder grills / prototypes / researches per ticket). **Never answer for the user.**
+3. **Synthesises the spec** once the decisions are made.
 
-### Step 4 — Plan
-Invoke `flutter-plan` for this task (point it at the Step 3 `scope.md` so it reuses that map instead
-of re-scouting) → writes `{plans_dir}/{slug}/plan.md` (phased, with a Testing
-Strategy, a `complexity` field, and an Owner column on the File Changes table for team runs).
-**Read the plan's `complexity`** — surface it at the approval gate.
+Let wayfinder own all decision-hardening — **do not** grill or plan separately. Record the spec's
+location (file path or issue URL) in `_status.md` so later steps find it.
 
-### Step 4.5 — Grill (harden the plan)
-Unless skipped (`--no-grill` / `--skip-approval`), invoke `flutter-grill {plans_dir}/{slug}` to
-interrogate the open decisions in `plan.md` one at a time (each with a recommended answer,
-codebase checked first) → writes the resolved decisions back into `plan.md` + a `grill.md` log.
-It auto-skips (no questions) when the plan is already unambiguous. The approval gate below then
-runs on the **hardened** plan.
+**Small-task fall-through:** for a **small** change (Sizing above — wayfinder declines the map),
+skip the map: proceed straight to Step 5 (Scout) and Step 6 (Execute) with the input as the spec.
+Note this in `_status.md`.
 
 ### Approval gate
-Unless `--skip-approval`, present a summary of the hardened plan and **wait**:
+Unless `--skip-approval`, present a summary of the spec and **wait**:
 ```
-Plan ready: {plans_dir}/{slug}/plan.md
-- Complexity: {…} (dev count auto-picked by flutter-execute)   Files: {n}   Feature flag: {name|n/a}   HIGH-RIGOR: {yes/no}
-- Key changes: {3-5 bullets}
+Spec ready: {spec location}
+- Destination: {one line}     Files touched (est., from spec): {n}   Feature flag: {name|n/a}   HIGH-RIGOR (best-effort; flutter-execute re-checks vs high_rigor_domains): {yes/no}
+- Key decisions: {3-5 bullets from the wayfinder map's Decisions-so-far}
 Reply: approved · revise: {feedback} · abort
 ```
-`revise:` → re-run `flutter-plan` with feedback. `abort` → set `_status.md` CANCELLED, stop.
+`revise:` → re-enter wayfinder with the feedback. `abort` → set `_status.md` CANCELLED, stop.
 
-### Step 5 — Implement
-Hand the approved plan to the implementer **from the task branch** (so the team engine's
-`BASE` = `{type}/{slug}` and the merge stays in-lineage):
+### Step 4 — Slice into tracer-bullet tickets (if needed)
+If the spec spans more than one vertical slice, invoke `/mattpocock-skills:to-tickets` to break it
+into **tracer-bullet tickets** (GitHub issues / Jira) with blocking edges on the tracker. Skip for a
+single-slice change — the spec goes straight to Scout + Execute.
+
+### Step 5 — Scout
+Invoke `flutter-scout {target}` (target = main component/feature from the spec or input ticket).
+Write its map to `{plans_dir}/{slug}/scope.md`. Skip only for a **trivial** change (Sizing above).
+
+### Step 6 — Implement
+Hand the approved spec (and **tracer-bullet tickets**, if sliced) to the implementer **from the task
+branch** (so the team engine's `BASE` = `{type}/{slug}` and the merge stays in-lineage):
 ```
 git checkout {type}/{slug}
-flutter-execute {plans_dir}/{slug}/plan.md [--team N | --solo]
+flutter-execute {spec path | tracer-bullet ticket} [--team N | --solo]
 ```
-- Pass `--devs`/`--solo` through if given; otherwise `flutter-execute` auto-picks from the plan's `complexity`.
+- Pass `--devs`/`--solo` through if given; otherwise `flutter-execute` auto-picks from the spec's scope.
 - **Team mode** returns `{slug}/integrate` (already verified + reviewed inside `flutter-execute`).
   Fast-forward it onto the task branch: `git checkout {type}/{slug} && git merge --ff-only {slug}/integrate`.
   Solo mode commits onto `{type}/{slug}` directly — nothing to merge.
 - If `flutter-execute` returns BLOCKED (e.g. team merge conflict — it reports files/owners) →
   surface its report and stop.
 
-### Step 6 — Commit
+### Step 7 — Commit
 `flutter-execute` commits granularly via `/commit`. If anything is still uncommitted (status/doc
 tweaks, the integrate merge), run `/commit` once more. Never `git commit --no-verify`.
 
-### Step 7 — PR
-If `--no-pr` or `pr_tool: none` → push nothing; print the manual `git push` + PR command and stop at Step 9.
+### Step 8 — PR
+If `--no-pr` or `pr_tool: none` → push nothing; print the manual `git push` + PR command and stop at Step 10.
 Otherwise (`pr_tool: gh`):
 ```bash
 git push -u origin {type}/{slug}
-gh pr create --base {PR_BASE} --fill   # or build a body from plan.md + ticket link
+gh pr create --base {PR_BASE} --fill   # or build a body from the spec + ticket link
 ```
 If a `create-pr-description` / PR-template skill is available, use it for the body. If `gh` is
 absent/unauthed → print the manual steps (don't fail the whole run).
 
-### Step 8 — Ticket transition (best-effort)
-If a ticket was fetched and `ticket_system` supports transitions, move it to the review state
-(e.g. "In Review" / "Code Review"). On failure → log a warning, continue. Skip for free-form runs.
+### Step 9 — Input-ticket transition (best-effort)
+If an **input ticket** was fetched and `ticket_system` supports transitions, move it to the review
+state (e.g. "In Review" / "Code Review"). On failure → log a warning, continue. Skip for free-form runs.
 
-### Step 9 — Report
+### Step 10 — Report
 ```
-## Resolved: {ticket id | description}
+## Resolved: {input ticket id | description}
 Branch: {type}/{slug} → {PR_BASE}     PR: {url | "not created (--no-pr)"}
 Mode: {solo | team N}                 Ticket: {new state | n/a}
 Files: {n}   Tests: {n} ({passing | analyze/build-only})   Review: {APPROVED | issues}
-Artifacts: {plans_dir}/{slug}/ (scope.md, plan.md, _status.md[, dev-*.md, peer-review.md])
+Artifacts: {plans_dir}/{slug}/ (scope.md, _status.md[, spec / tracer-bullet ticket links, dev-*.md, peer-review.md])
 Next: review the PR · add reviewers · merge when green
 ```
 
 ---
 
 ## Gates & constraints (never skip)
-1. **Approval** after planning (unless `--skip-approval`).
+1. **Approval** after wayfinder produces the spec (unless `--skip-approval`).
 2. **Verify** — owned by `flutter-execute`.
 3. **Review** — owned by `flutter-execute`.
 
 - **DO NOT** implement code yourself — `flutter-execute` is the only implementer.
-- **DO NOT** auto-merge to `{PR_BASE}`; never push before Step 7.
+- **DO NOT** plan or grill separately — `wayfinder` owns planning and decision-hardening.
+- **DO NOT** auto-merge to `{PR_BASE}`; never push before Step 8.
 - **Sacrifice grammar for concision** in reports.

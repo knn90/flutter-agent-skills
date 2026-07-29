@@ -1,8 +1,7 @@
 ---
 name: flutter-brainstorm
-description: "Brainstorm solutions for a Flutter app. Use for ideation, architecture decisions, or feasibility checks. Does NOT implement — hands off to flutter-plan."
+description: "Brainstorm solutions for a Flutter app. Use for ideation, architecture decisions, or feasibility checks. Does NOT implement — hands off to wayfinder."
 argument-hint: "[topic | TICKET-ID | description]"
-model: best
 effort: xhigh
 ---
 
@@ -102,7 +101,7 @@ Path: `{reports_dir}/brainstorm-{YYMMDD-HHMM}-{TICKET|slug}.md`
 ## Phase 6 — Hand-off (menu, do NOT auto-invoke)
 ```
 Brainstorm complete → {reports_dir}/<file>.md
-- Create plan      → flutter-plan <ticket-or-topic>
+- Create plan      → wayfinder <ticket-or-topic>
 - More research    → flutter-research <sub-topic>
 - Deep reasoning   → flutter-sequential-thinking <problem>
 - Stop here        → keep report as decision record

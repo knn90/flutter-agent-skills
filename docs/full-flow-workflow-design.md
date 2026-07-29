@@ -1,8 +1,9 @@
 # Full-Flow Flutter Workflow — Design & Implementation Plan
 
-**Status:** ported from the ios-* suite (2026-07-08) — decisions locked (see §6)
+**Status:** ported from the ios-* suite (2026-07-08) — decisions locked (see §6). **Amended 2026-07-29 (§9):**
+planning delegated to `mattpocock-skills:wayfinder`; `flutter-plan` + `flutter-grill` removed.
 **Goal:** One entry point that takes a *ticket or free-form context* and drives it end-to-end:
-**scout → plan → implement (parallel team) → test → review → PR**, project-agnostic (profile-driven).
+**wayfinder (spec) → scout → implement (parallel team) → test → review → PR**, project-agnostic (profile-driven).
 **Decision taken:** generalized suite (`flutter-skills/`) + a proven team-execution engine.
 
 ---
@@ -14,7 +15,7 @@ The generalized `flutter-skills/` suite already covers most of the flow. Every s
 | Stage | Existing skill | Produces |
 |---|---|---|
 | Scout | `flutter-scout` | a *map* (paths:line) — parallel Explore agents |
-| Plan | `flutter-plan` | `plan.md` + per-phase files under `plans_dir`, approval-aware |
+| Plan | `mattpocock-skills:wayfinder` | a spec (charted via decision tickets), approval-aware — *external, see §9* |
 | Implement | `flutter-execute` | code; plan-first → verify → review gates; solo + team |
 | Review | `flutter-code-review` | 3-stage adversarial review + verdict |
 | Research / ideate / reason | `flutter-research`, `flutter-brainstorm`, `flutter-sequential-thinking` | reports / reasoning |
@@ -46,9 +47,9 @@ Pipeline (each step delegates to an existing skill; orchestrator only sequences 
      TICKET-ID (matches ticket_pattern) → fetch via ticket_fetch
      free-form                           → use as task description
 2. INIT      → create branch {type}/{slug} off {base}; create plans_dir/{slug}/ + _status.md
-3. SCOUT     → flutter-scout  → writes scope.md
-4. PLAN      → flutter-plan   → writes plan.md   ── APPROVAL GATE (unless --skip-approval)
-5. IMPLEMENT → flutter-execute (plan-path) [--team N | --solo]  → code + verify + review
+3. PLAN      → wayfinder  → charts a spec (── APPROVAL GATE unless --skip-approval); to-tickets if sliced
+4. SCOUT     → flutter-scout  → writes scope.md
+5. IMPLEMENT → flutter-execute (spec/ticket path) [--team N | --solo]  → code + verify + review
 6. COMMIT    → /commit (granular; ticket id from branch)
 7. PR        → gh pr create --base {base}   (skip if --no-pr or no gh)
 8. TICKET    → best-effort transition (e.g. → CODE REVIEW) if ticket_system supports it
@@ -113,7 +114,7 @@ Task workspace reuses **`plans_dir/{slug}/`** (where `plan.md` already lands) fo
 
 Testing is woven through, not bolted on:
 
-1. **Plan** — `flutter-plan` emits a *Testing Strategy* (unit / widget / golden / integration + Semantics labels).
+1. **Plan** — the `wayfinder` spec carries a *Testing Strategy* (unit / widget / golden / integration + Semantics labels).
 2. **Implement** — each team dev writes tests **first** for their slice (TDD); solo mode writes tests alongside.
 3. **Verify gate** — `verify_command` (analyze + test) must pass; output is read, not assumed. Unset → analyze/build-only, stated explicitly.
 4. **Review gate** — `flutter-code-review` checks test coverage of changed logic + transition holes.
@@ -128,9 +129,9 @@ TICKET-ID / context
       ▼
 flutter-resolve ──INIT──► branch + plans_dir/{slug}/_status.md
       │
-      ├─► flutter-scout ───────────► scope.md
+      ├─► wayfinder ───────────► spec ──[APPROVAL GATE]── to-tickets (if sliced)
       │
-      ├─► flutter-plan ────────────► plan.md ──[APPROVAL GATE]
+      ├─► flutter-scout ───────────► scope.md
       │
       ├─► flutter-execute --team N ► .worktrees/{slug}/dev-1..N ──peer review──► integrate
       │        │                                                                  │
@@ -143,7 +144,7 @@ flutter-resolve ──INIT──► branch + plans_dir/{slug}/_status.md
       └─► gh pr create ────────────► PR url ──► (best-effort ticket transition)
 ```
 
-Artifacts under `plans_dir/{slug}/`: `_status.md`, `scope.md`, `plan.md`, `dev-1..N.md`, `peer-review.md`.
+Artifacts under `plans_dir/{slug}/`: `_status.md`, `scope.md`, spec/ticket pointers (the spec itself lives on the wayfinder tracker), `dev-1..N.md`, `peer-review.md`.
 
 ---
 
@@ -183,8 +184,28 @@ Phases 2 and 3 are the bulk. 1 is quick. 4–6 are hardening.
 ## 8. Hardening decisions
 
 - **Dev worktree model** — native harness `isolation:"worktree"`; each dev commits to branch `{slug}/dev-N`; merge + peer-review happen by **branch name** (`git diff {base}...{slug}/dev-N`), so paths don't matter; the harness auto-cleans dev worktrees; only the integrate worktree is skill-managed.
-- **Plan inputs** — `flutter-plan` emits a `complexity` frontmatter field (drives the auto dev-count) and an **Owner** column on the File Changes table (one owner per file → clean parallel merges).
+- **Plan inputs** — the `complexity` signal (drives the auto dev-count) and per-file **Owner** assignment now come from the `wayfinder` spec / `to-tickets` slices; `flutter-execute` estimates them itself when charting a micro-plan for a small change. *(Originally emitted by `flutter-plan` — see §9.)*
 - **Test split** — **vertical slices**: each dev owns code **and** tests for their slice (real local TDD, clean per-file ownership), no dedicated test dev. Independent edge-case coverage is a dedicated adversarial **edge-case / logic-gap reviewer agent** (Phase D) that drives missing tests *pre-merge*; the post-merge `flutter-code-review` adversarial pass stays the final gate.
 - **Bug fixes** — (1) the team engine builds on the **task branch** (`BASE`), ff-merged back into it; (2) team-mode review uses `git diff {base}...{slug}/integrate`, not `--pending`; (3) devs must compile (`flutter analyze` clean) their worktree before reporting done (full test gate stays serialized at integrate).
 
-**Known soft spot (for the dry-run):** the whole team engine is unexercised, and `flutter-plan` reliably populating `complexity` / `Owner` is LLM-dependent. The dry-run (§5 phase 6) is where these get validated.
+**Known soft spot (for the dry-run):** the whole team engine is unexercised, and the spec reliably carrying `complexity` / `Owner` is LLM-dependent. The dry-run (§5 phase 6) is where these get validated.
+
+---
+
+## 9. Amendment — wayfinder-driven planning (2026-07-29)
+
+Planning moved out of this suite. The bespoke `flutter-plan` (phased `plan.md`) and `flutter-grill`
+(decision-hardening) skills are **removed**; their role is now filled by
+[`mattpocock-skills:wayfinder`](https://github.com/mattpocock), which charts the work as a **spec**
+through decision tickets — driving its own sub-skills (prototyping, grilling, research, …)
+internally, then `/to-tickets` to slice the spec when the work spans more than one session.
+
+**New pipeline:** `input → init → wayfinder (spec) ──approval──► to-tickets (if needed) → flutter-scout → flutter-execute → commit → PR`.
+
+**Rationale / trade-offs:**
+- **Grilling doesn't disappear** — it moves *inside* wayfinder (which grills to name the destination and map the frontier). We drop the separate `flutter-grill` pass on a `plan.md`.
+- **`flutter-execute` decoupled from `plan.md`** — it now consumes a spec/tickets (or micro-plans a trivial change itself); `complexity` / `Owner` come from the spec/scope rather than a plan frontmatter field.
+- **External dependency + tracker** — wayfinder is a `mattpocock-skills` plugin and its ticket ops assume `/setup-matt-pocock-skills` has configured an issue tracker (defaults to local-markdown). Install it alongside this suite.
+- **Small-task escape hatch** — if wayfinder finds no fog (the change fits one session), it declines the map and `flutter-resolve` falls straight through to scout → execute.
+
+Sections §1–§8 above are the original v1 record; where they still name `flutter-plan` / `flutter-grill`, this section supersedes them.
