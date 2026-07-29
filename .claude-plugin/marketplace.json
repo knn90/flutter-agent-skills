@@ -8,7 +8,7 @@
     {
       "name": "flutter-skills",
       "source": "./",
-      "description": "Flutter engineering workflow + specialist reviewers (scout · plan · execute · code-review · resolve, plus Widget / Async / Testing / SOLID experts)."
+      "description": "Flutter engineering workflow + specialist reviewers (scout · execute · code-review · resolve, plans via mattpocock-skills:wayfinder, plus Widget / Async / Testing / SOLID experts)."
     }
   ]
 }
