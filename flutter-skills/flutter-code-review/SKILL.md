@@ -2,7 +2,6 @@
 name: flutter-code-review
 description: "Adversarial, multi-lens code review for a Flutter project (Dart / widgets / state management); routes slices of the diff to installed flutter-* specialist skills. Use for PR, commit, pending-diff, or whole-codebase review."
 argument-hint: "[#PR | COMMIT | --pending | codebase]"
-model: best
 effort: xhigh
 ---
 
